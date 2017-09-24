@@ -1,0 +1,12 @@
+*.md
+.vscode
+_book
+test
+*.jpg
+*.png
+*.css
+*.js
+*.jpeg
+node_modules
+*.db
+*.json

@@ -2,7 +2,23 @@
 
 import glob
 import itertools
+import shutil
+import os
 
+def copy_files_for_gitbook(glob_description):
+    """Recreate a folder and copy files to that folder"""
+    try:
+        shutil.rmtree('gitbook')
+    except FileNotFoundError:
+        print('No folder to delete')
+
+    # os.mkdir('./gitbook')
+    for item in [item for item in os.listdir('.') if item.startswith('poglavje')]:
+        shutil.copytree(item, 'gitbook/{}'.format(item))
+
+    shutil.copy('book.json', 'gitbook/')
+    shutil.copytree('media', 'gitbook/media')
+    shutil.copy('README.md', 'gitbook')
 
 def create_a_list_of_files(glob_description):
     """Return a sorted list of all files in a directory with relative paths"""
@@ -31,13 +47,14 @@ def create_summary(list_of_chapters):
                 header = file.readline()
                 stripped_header = header.strip('#').strip()
                 if header.startswith('###'):
-                    yield '\t\t* [{}]({})\n'.format(stripped_header, chapter)
-                elif header.startswith('##'):
                     yield '\t* [{}]({})\n'.format(stripped_header, chapter)
+                elif header.startswith('##'):
+                    yield '* [{}]({})\n'.format(stripped_header, chapter)
                 elif header.startswith('#'):
-                    yield '\n\n ---\n * [{}]({})\n'.format(stripped_header, chapter)
+                    yield '\n\n## {}\n'.format(stripped_header)
 if __name__ == '__main__':
-    ALL_FILES_GROUPED = group_files(create_a_list_of_files('poglavje-*/*'))
+    copy_files_for_gitbook('poglavje-*')
+    ALL_FILES_GROUPED = group_files(create_a_list_of_files('gitbook/poglavje-*/*'))
     with open('summary.md', 'w', encoding='utf-8') as write_to_file:
         write_to_file.write('# Summary\n\n')
         for line in create_summary(ALL_FILES_GROUPED):
