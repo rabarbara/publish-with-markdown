@@ -29,26 +29,21 @@ def test_copy_files_for_gitbook(set_book):
     assert any([item for item in os.listdir(set_book.gitbook) if set_book.folder in item])
 
 def test_create_list_of_files(set_book):
-    gitbook = 'gitbook'
-    media = 'media'
-    folder = 'poglavje'
-    book = gb.Gitbook(gitbook_folder=gitbook,
-                      common_folder_name=folder,
-                      media_folder_name=media)
 
-    book.copy_files_for_gitbook()
-    book.create_a_list_of_files('poglavje-*/*')
-    assert len(book.list_of_files) == len([item for item in os.listdir(gitbook) if folder in item])
+    set_book.book.copy_files_for_gitbook()
+    set_book.book.create_a_list_of_files('poglavje-*/*')
+    assert len(set_book.book.list_of_files) == len([item for item in os.listdir(set_book.gitbook) if set_book.folder in item])
     
 
-def test_create_list_of_files_ugly_path():
-    gitbook = 'gitbook'
-    media = 'media'
-    folder = 'poglavje'
-    book = gb.Gitbook(gitbook_folder=gitbook,
-                      common_folder_name=folder,
-                      media_folder_name=media)
-
-    book.copy_files_for_gitbook()
-    book.create_a_list_of_files('poglavje-*/*')
+def test_create_list_of_files_ugly_path(set_book):
+    set_book.book.copy_files_for_gitbook()
+    set_book.book.create_a_list_of_files('asdf-*/*')
     
+    assert len(set_book.book.list_of_files) == 0
+
+def test_internal_function_summary(set_book):
+    book = set_book.book
+    set_book.book.copy_files_for_gitbook()
+    book.create_a_list_of_files('poglavje-*/*')
+    print(list(book._create_summary(book.list_of_files)))
+    assert len(list(book._create_summary(book.list_of_files))) > 0
