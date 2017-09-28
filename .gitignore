@@ -10,3 +10,5 @@ test
 node_modules
 *.db
 *.json
+__pycache__
+gitbook
