@@ -12,3 +12,4 @@ node_modules
 *.json
 __pycache__
 gitbook
+.cache
