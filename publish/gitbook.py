@@ -64,6 +64,6 @@ class Gitbook(object):
                         yield '\n\n## {}\n'.format(stripped_header)
 
     def write_summary(self):
-        with open('summary.md', 'w', encoding='utf-8') as write_to_file:
+        with open('SUMMARY.md', 'w', encoding='utf-8') as write_to_file:
             for chapterline in self._create_summary(self.list_of_files):
                 write_to_file.write(chapterline)
