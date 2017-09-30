@@ -5,6 +5,7 @@ import pytest
 from collections import namedtuple
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import publish.gitbook as gb
+import shutil
 
 #pylint: disable=import-error
 
@@ -19,7 +20,10 @@ def set_book():
                       media_folder_name=media)
     book = namedtuple('Book', 'book, gitbook, media, folder')
     git_book = book(gb_book, gitbook, media, folder)
-    return git_book
+    gb_book.copy_files_for_gitbook()
+    yield git_book
+    # shutil.rmtree(gitbook)
+    # shutil.rmtree(os.path.join(gitbook,media))
 
 def test_copy_files_for_gitbook(set_book):
     set_book.book.copy_files_for_gitbook()
