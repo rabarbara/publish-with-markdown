@@ -59,3 +59,11 @@ def test_internal_function_summary(set_book):
 
 def test_write_summary(set_book):
     book = set_book.book
+    book.create_a_list_of_files('poglavje-*/*')
+    book.write_summary()
+    assert os.path.isfile('SUMMARY.md')
+    with open('SUMMARY.md', 'r', encoding='utf-8') as summary:
+        assert summary.readline().startswith('# Summary')
+
+
+

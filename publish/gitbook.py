@@ -63,8 +63,14 @@ class Gitbook(object):
                     elif header.startswith('#'):
                         yield '\n\n## {}\n'.format(stripped_header)
 
-    def write_summary(self):
-        with open('SUMMARY.md', 'w', encoding='utf-8') as write_to_file:
+    def write_summary(self, path_to_file='.'):
+        """Writes the gitbook summary to a file
+        :parameter Path to the file to be written. Default is the same directory where the method is called
+        :return None
+        
+        """
+        with open(os.path.join(path_to_file, 'SUMMARY.md'), 'w', encoding='utf-8') as write_to_file:
+            # the summary file has to start with a # heading
             write_to_file.write('# Summary')
             for chapterline in self._create_summary(self.list_of_files):
                 write_to_file.write(chapterline)
