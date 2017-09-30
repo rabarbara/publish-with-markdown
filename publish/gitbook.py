@@ -65,5 +65,6 @@ class Gitbook(object):
 
     def write_summary(self):
         with open('SUMMARY.md', 'w', encoding='utf-8') as write_to_file:
+            write_to_file.write('# Summary')
             for chapterline in self._create_summary(self.list_of_files):
                 write_to_file.write(chapterline)
