@@ -1,4 +1,3 @@
-*.md
 .vscode
 _book
 test
@@ -14,3 +13,6 @@ __pycache__
 gitbook
 .cache
 .idea
+*.egg-info
+tests/*.md
+tests/*/*.md
