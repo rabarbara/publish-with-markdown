@@ -65,7 +65,7 @@ class Gitbook(object):
 
     def write_summary(self, path_to_file='.'):
         """Writes the gitbook summary to a file
-        :parameter Path to the file to be written. Default is the same directory where the method is called
+        :parameter path_to_file Path to the file to be written. Default is the same directory where the method is called
         :return None
         
         """
