@@ -5,6 +5,7 @@ import itertools
 import shutil
 import os
 
+
 class Gitbook(object):
 
     def __init__(self, gitbook_folder='gitbook', common_folder_name='poglavje', media_folder_name='media'):
@@ -67,7 +68,6 @@ class Gitbook(object):
         """Writes the gitbook summary to a file
         :parameter path_to_file Path to the file to be written. Default is the same directory where the method is called
         :return None
-        
         """
         with open(os.path.join(path_to_file, 'SUMMARY.md'), 'w', encoding='utf-8') as write_to_file:
             # the summary file has to start with a # heading

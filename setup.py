@@ -12,7 +12,7 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='publish_with_markdown',
+    name='markpub',
     version='0.1.0',
     description='A collection of tools for a faster publishing of books with markdown',
     long_description=readme,
@@ -20,5 +20,5 @@ setup(
     author_email='matej@stavanja.io',
     url='https://github.com/rabarbara/publish-with-markdown.git',
     license=license,
-    packages=find_packages(exclude=('tests', 'docs'))
+    # packages=find_packages(exclude=('tests', 'docs'))
 )
