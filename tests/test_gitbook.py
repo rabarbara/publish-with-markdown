@@ -5,7 +5,7 @@ import pytest
 from collections import namedtuple
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-import publish.gitbook as gb
+import gitbook.summary as gb
 import shutil
 
 
@@ -17,7 +17,7 @@ def set_book():
     gitbook = 'gitbook'
     media = 'media'
     folder = 'poglavje'
-    gb_book = gb.Gitbook(gitbook_folder=gitbook,
+    gb_book = gb.Summary(gitbook_folder=gitbook,
                          common_folder_name=folder,
                          media_folder_name=media)
     book = namedtuple('Book', 'book, gitbook, media, folder')

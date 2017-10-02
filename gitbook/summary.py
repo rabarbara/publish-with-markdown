@@ -6,7 +6,7 @@ import shutil
 import os
 
 
-class Gitbook(object):
+class Summary(object):
 
     def __init__(self, gitbook_folder='gitbook', common_folder_name='poglavje', media_folder_name='media'):
         self.gitbook_folder = str(gitbook_folder)

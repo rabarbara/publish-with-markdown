@@ -10,7 +10,7 @@ node_modules
 *.db
 *.json
 __pycache__
-gitbook
+tests/gitbook
 .cache
 .idea
 *.egg-info
