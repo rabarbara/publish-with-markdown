@@ -22,7 +22,7 @@ class Summary(object):
             print('No folder to delete')
 
         for item in [item for item in os.listdir('.') if self.common_folder_name in item]:
-            shutil.copytree(item, 'gitbook/{}'.format(item))
+            shutil.copytree(item, '{}/{}'.format(self.gitbook_folder, item))
         shutil.copytree(self.media_folder_name, 
                         '{}/{}'.format(self.gitbook_folder, self.media_folder_name))
         try:
@@ -36,7 +36,8 @@ class Summary(object):
         def sections(section):
             """Returns a tuple of all chapter info"""
             chapter_name = os.path.basename(section)
-            return tuple(chapter_name.split('.'))
+            # omit the md extension that was giving false results
+            return tuple(chapter_name.split('.')[:-1])
 
         self.list_of_files = self._group_files(sorted([item for item in glob.glob(glob_description)], key=sections))
 
@@ -71,6 +72,6 @@ class Summary(object):
         """
         with open(os.path.join(path_to_file, 'SUMMARY.md'), 'w', encoding='utf-8') as write_to_file:
             # the summary file has to start with a # heading
-            write_to_file.write('# Summary')
+            write_to_file.write('# Summary\n\n')
             for chapterline in self._create_summary(self.list_of_files):
                 write_to_file.write(chapterline)
