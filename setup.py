@@ -20,5 +20,5 @@ setup(
     author_email='matej@stavanja.io',
     url='https://github.com/rabarbara/publish-with-markdown.git',
     license=license,
-    # packages=find_packages(exclude=('tests', 'docs'))
+    packages=find_packages(exclude=('tests', 'docs'))
 )
