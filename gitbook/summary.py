@@ -9,6 +9,11 @@ import os
 class Summary(object):
 
     def __init__(self, gitbook_folder='gitbook', common_folder_name='poglavje', media_folder_name='media'):
+        """
+        :param gitbook_folder: the name of the folder the gitbook files should be copied to
+        :param common_folder_name: the common characters that exist in your folder names for all folders containing your book
+        :param media_folder_name: where you keep your images and other files
+        """
         self.gitbook_folder = str(gitbook_folder)
         self.common_folder_name = common_folder_name
         self.media_folder_name = media_folder_name
