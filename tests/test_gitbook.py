@@ -66,12 +66,35 @@ def test_write_summary(set_book):
     with open(os.path.join(set_book.gitbook,'SUMMARY.md'), 'r', encoding='utf-8') as summary:
         assert summary.readline().startswith('# Summary')
 
-def test_convert_yaml_to_json_file_path():
-    # give string and receive string
+def test_convert_yaml_to_json_file():
+    # give string and receive json dump string
     with open(os.path.join(os.path.dirname(__file__), 'meta.md'), mode='r', encoding='utf-8') as meta_data:
         assert isinstance(gb.convert_yaml_to_json(meta_data.read()), str)
 
-    
+@pytest.mark.yaml
+def test_missing_title_error():
+    test_data_without_title = """
+---
+subtitle: Subtitle
+author:
+  - Author 2
+  - Author 1
+creator:
+- role: Editor
+  text: Main editor
+- role: Production editor
+  text: Prod editor
+- role: Proofreader
+  text: Proofreader 1
+identifier: ISSN 3456-3412
+publisher: Publishin company
+date: 2016
+cover-image: cover-image.jpg
+rights: | 
+  All rights reserved
+...
+                    """
 
+    with pytest.raises(ValueError, message='Missing data from metadata: title'):
+        gb.convert_yaml_to_json(test_data_without_title)
 
-    

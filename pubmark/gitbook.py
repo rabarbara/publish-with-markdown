@@ -90,8 +90,10 @@ def convert_yaml_to_json(data):
     @param data: the data to be converted
     @return string: json string that has to be put into a file somewhere
     """
-
-
-    json_data = yaml.safe_load(data)
-    
+    mandatory_data = ['title', 'subtitle', 'creator', 'identifier', 'publisher', 'date', 'cover-image', 'rights' ]
+    json_data = yaml.load(data)
+    print(data, json_data)
+    for item in mandatory_data:
+        if item not in json_data:
+            raise ValueError('Missing data from metadata: {}'.format(item))
     return json.dumps(json_data, indent=4)
