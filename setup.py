@@ -12,7 +12,7 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='markpub',
+    name='pubmark',
     version='0.1.0',
     description='A collection of tools for a faster publishing of books with markdown',
     long_description=readme,
