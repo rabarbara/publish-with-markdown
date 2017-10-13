@@ -5,7 +5,7 @@ import pytest
 from collections import namedtuple
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-import gitbook.summary as gb
+from pubmark import gitbook as gb
 import shutil
 
 
@@ -54,15 +54,15 @@ def test_internal_function_summary(set_book):
     book.create_a_list_of_files('poglavje-*/*')
     assert len(list(book._create_summary(book.list_of_files))) > 1
     assert all([item for item in book._create_summary(book.list_of_files)
-                if (item.startswith('*') or item.startswith('\t') or item.startswith('\n\n'))])
+                if item.startswith('*') or item.startswith('\t') or item.startswith('\n\n')])
 
 
 def test_write_summary(set_book):
     book = set_book.book
     book.create_a_list_of_files('poglavje-*/*')
     book.write_summary()
-    assert os.path.isfile('SUMMARY.md')
-    with open('SUMMARY.md', 'r', encoding='utf-8') as summary:
+    assert os.path.isfile(os.path.join(set_book.gitbook,'SUMMARY.md'))
+    with open(os.path.join(set_book.gitbook,'SUMMARY.md'), 'r', encoding='utf-8') as summary:
         assert summary.readline().startswith('# Summary')
 
 
