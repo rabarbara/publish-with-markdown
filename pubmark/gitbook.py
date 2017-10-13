@@ -4,7 +4,7 @@ import glob
 import itertools
 import shutil
 import os
-
+import yaml
 
 class Summary(object):
 
@@ -28,7 +28,7 @@ class Summary(object):
 
         for item in [item for item in os.listdir('.') if self.common_folder_name in item]:
             shutil.copytree(item, '{}/{}'.format(self.gitbook_folder, item))
-        shutil.copytree(self.media_folder_name, 
+        shutil.copytree(self.media_folder_name,
                         '{}/{}'.format(self.gitbook_folder, self.media_folder_name))
         try:
             shutil.copy('README.md', self.gitbook_folder)
@@ -81,3 +81,27 @@ class Summary(object):
             write_to_file.write('# Summary\n\n')
             for chapterline in self._create_summary(self.list_of_files):
                 write_to_file.write(chapterline)
+
+
+def convert_yaml_to_json(filepath_or_string):
+    """
+    Converts the yaml metadata as defined in pandoc for gitbook consumption as a book.json
+    @param filepath_or_string: either the filepath to the file or the actual data to be converted
+    @return string: json string that has to be put into a file somewhere
+    """
+
+    def get_data(file_data):
+        """
+        Checks if the parameter is a string or file path and returns the data
+        @param file_data: either the path or the actual data as a string
+        @Return: the data we need for conversion
+        """
+        if os.path.isfile(file_data):
+            with open(file_data, mode='r', encoding='utf-8') as f:
+                return f.read()
+        return file_data
+
+    meta_data = get_data(filepath_or_string)
+
+    json_data = yaml.safe_load(meta_data)
+    return json_data

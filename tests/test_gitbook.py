@@ -6,6 +6,7 @@ from collections import namedtuple
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from pubmark import gitbook as gb
+
 import shutil
 
 
@@ -65,5 +66,14 @@ def test_write_summary(set_book):
     with open(os.path.join(set_book.gitbook,'SUMMARY.md'), 'r', encoding='utf-8') as summary:
         assert summary.readline().startswith('# Summary')
 
+def test_convert_yaml_to_json():
+    # check if both filepath and string are accepted
 
+    # full filepath with the correct file
+    assert gb.convert_yaml_to_json(os.path.join('.', 'meta.md'))
+
+
+    # full data
+    with open(os.path.join('.', 'meta.md'), 'r', encoding='utf-8') as f:
+        assert gb.convert_yaml_to_json(f.read())
 
