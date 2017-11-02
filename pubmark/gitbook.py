@@ -7,8 +7,8 @@ import os
 import yaml
 import json
 
-class Summary(object):
 
+class Summary(object):
     def __init__(self, gitbook_folder='gitbook', common_folder_name='poglavje', media_folder_name='media'):
         """
         :param gitbook_folder: the name of the folder the gitbook files should be copied to
@@ -54,8 +54,9 @@ class Summary(object):
         """Group a list of files based on the chapter they are in"""
         groups = []
         uniquekeys = []
-        for k, g in itertools.groupby(files, key=lambda file: os.path.split(file)[0]): # gitbook/chapter/file.md => sort by chapter
-            groups.append(list(g))      # Store group iterator as a list
+        # gitbook/chapter/file.md => sort by chapter
+        for k, g in itertools.groupby(files, key=lambda file: os.path.split(file)[0]):
+            groups.append(list(g))  # Store group iterator as a list
             uniquekeys.append(k)
         return groups
 
