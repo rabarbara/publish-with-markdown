@@ -62,14 +62,16 @@ def test_write_summary(set_book):
     book = set_book.book
     book.create_a_list_of_files('poglavje-*/*')
     book.write_summary()
-    assert os.path.isfile(os.path.join(set_book.gitbook,'SUMMARY.md'))
-    with open(os.path.join(set_book.gitbook,'SUMMARY.md'), 'r', encoding='utf-8') as summary:
+    assert os.path.isfile(os.path.join(set_book.gitbook, 'SUMMARY.md'))
+    with open(os.path.join(set_book.gitbook, 'SUMMARY.md'), 'r', encoding='utf-8') as summary:
         assert summary.readline().startswith('# Summary')
+
 
 def test_convert_yaml_to_json_file():
     # give string and receive json dump string
     with open(os.path.join(os.path.dirname(__file__), 'meta.md'), mode='r', encoding='utf-8') as meta_data:
-        assert isinstance(gb.convert_yaml_to_json(meta_data.read()), str)
+        assert isinstance(gb.convert_metayaml_to_metajson(meta_data.read()), str)
+
 
 @pytest.mark.yaml
 def test_missing_title_error():
@@ -96,5 +98,4 @@ rights: |
                     """
 
     with pytest.raises(ValueError, message='Missing data from metadata: title'):
-        gb.convert_yaml_to_json(test_data_without_title)
-
+        gb.convert_metayaml_to_metajson(test_data_without_title)
