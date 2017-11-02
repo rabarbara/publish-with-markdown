@@ -34,7 +34,9 @@ class Summary(object):
         try:
             shutil.copy('README.md', self.gitbook_folder)
         except FileNotFoundError:
-            print('Datoteka README.md ne obstaja.')
+            print('Datoteka README.md ne obstaja. Zato je bila ustvarjena.')
+            f = open(os.path.join(self.gitbook_folder, 'README.md'), 'w+', encoding='utf-8')
+            f.close()
 
     def create_a_list_of_files(self, glob_description):
         """Return a sorted list of all files in a directory with relative paths"""
