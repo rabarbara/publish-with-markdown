@@ -15,18 +15,25 @@ class Summary(object):
         :param common_folder_name: the common characters that exist in your folder names for all folders containing your book
         :param media_folder_name: where you keep your images and other files
         """
-        self.gitbook_folder = str(gitbook_folder)
+        self.gitbook_folder = os.path.join(os.environ['HOMEPATH'], 'Desktop', gitbook_folder)
         self.common_folder_name = common_folder_name
         self.media_folder_name = media_folder_name
         self.list_of_files = []
+        print('collected items', self.gitbook_folder)
 
     def copy_files_for_gitbook(self):
         """Recreate a folder and copy files to that folder"""
         try:
-            shutil.rmtree(self.gitbook_folder)
+            items = os.listdir(self.gitbook_folder)
+            for item in items:
+                if item.endswith('book') or item.endswith('node_modules'):
+                    pass
+                elif os.path.isdir(os.path.join(self.gitbook_folder, item)):
+                    shutil.rmtree(os.path.join(self.gitbook_folder, item))
+                else:
+                    os.remove(os.path.join(self.gitbook_folder, item))
         except FileNotFoundError:
             print('No folder to delete')
-
         for item in [item for item in os.listdir('.') if self.common_folder_name in item]:
             shutil.copytree(item, '{}/{}'.format(self.gitbook_folder, item))
         shutil.copytree(self.media_folder_name,
