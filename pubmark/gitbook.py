@@ -6,19 +6,20 @@ import shutil
 import os
 import yaml
 import json
+import re
 
-
-class Summary(object):
+class Gitbook(object):
     def __init__(self, gitbook_folder='gitbook', common_folder_name='poglavje', media_folder_name='media'):
         """
         :param gitbook_folder: the name of the folder the gitbook files should be copied to
         :param common_folder_name: the common characters that exist in your folder names for all folders containing your book
         :param media_folder_name: where you keep your images and other files
         """
-        self.gitbook_folder = os.path.join(os.environ['HOME'], 'Desktop', gitbook_folder)
+        self.gitbook_folder = os.path.join(os.environ['HOMEPATH'], 'Desktop', gitbook_folder)
         self.common_folder_name = common_folder_name
         self.media_folder_name = media_folder_name
         self.list_of_files = []
+        print('collected items', self.gitbook_folder)
 
     def copy_files_for_gitbook(self):
         """Recreate a folder and copy files to that folder"""
@@ -33,7 +34,6 @@ class Summary(object):
                     os.remove(os.path.join(self.gitbook_folder, item))
         except FileNotFoundError:
             print('No folder to delete')
-
         for item in [item for item in os.listdir('.') if self.common_folder_name in item]:
             shutil.copytree(item, '{}/{}'.format(self.gitbook_folder, item))
         shutil.copytree(self.media_folder_name,
@@ -56,6 +56,21 @@ class Summary(object):
 
         self.list_of_files = self._group_files(sorted([item for item in glob.glob(glob_description)], key=sections))
 
+    def remove_all_sidenotes(self):
+        for group in self.list_of_files:
+            for element in group:
+                contents = ''
+                with open(element, 'r', encoding='utf-8') as readf:
+                    contents = readf.read()
+                # we had multiple sidenote version so we have to chech against each version, the second version pattern is the new standard
+                first_version_pattern = re.compile(r'<[\*,\_,\?,](.*?)[\*,\_,\?,]>', re.MULTILINE)
+                second_version_pattern = re.compile(r'{{(.*?)}}', re.MULTILINE)
+                contents = re.sub(first_version_pattern, ' ', contents)
+                contents = re.sub(second_version_pattern, ' ', contents)
+                with open(element, 'w', encoding='utf-8' ) as write:
+                    write.write(contents)
+
+
     @staticmethod
     def _group_files(files):
         """Group a list of files based on the chapter they are in"""
@@ -66,6 +81,45 @@ class Summary(object):
             groups.append(list(g))  # Store group iterator as a list
             uniquekeys.append(k)
         return groups
+
+    @staticmethod
+    def _create_numbered_headline(filename, line):
+            '''
+            Returns a numbered name of the file
+            :line str the line to be numbered
+            :return numbered string of the file
+            '''
+
+            if line.startswith('###'):
+                return '### {} {}\n'.format(filename, line.strip('### '))
+            elif line.startswith('##'):
+                return '## {} {}\n'.format(filename, line.strip('## '))
+            elif line.startswith('#'):
+                return '# {} {}\n'.format(filename, line.strip('# '))
+    @staticmethod
+    def clean_filename_element(element):
+        '''
+        Returns a clean filename based on the element
+        '''
+        
+        el = '.'.join([str(int(item)) for item in os.path.basename(element).strip('.md').split('.')])
+        return el
+
+    def insert_numbering(self):
+        for group in self.list_of_files():
+            for element in group:
+                # we need just the last part of the filepath to remove the padding and insert numbering into the file
+                # we split the filename and convert it to int to remove the left pad and then put it back together
+                # we also remove the file extension because we don't need it
+                first_line_contents = ''
+                contents = ''
+                with open(element, 'r', encoding='utf-8') as readf:
+                    # read the first line
+                    first_line_contents = readf.readline()
+                    # get the rest of the text
+                    contents = readf.read()
+                with open(element, 'w', encoding='utf-8') as w:
+                    w.write('{}\n{}'.format(self._create_numbered_headline(self.clean_filename_element(element), first_line_contents), contents))
 
     @staticmethod
     def _create_summary(list_of_chapters):
@@ -81,7 +135,34 @@ class Summary(object):
                     elif header.startswith('#'):
                         yield '\n\n## {}\n'.format(stripped_header)
 
+    @staticmethod
+    def _create_numbered_summary(list_of_chapters):
+        for chapter_group in list_of_chapters:
+            for chapter in chapter_group:
+                with open(chapter, 'r', encoding='utf-8') as file:
+                    header = file.readline()
+                    # get the numbered header
+
+                    if header.startswith('###'):
+                        yield '\t* [{}]({})\n'.format(stripped_header, chapter)
+                    elif header.startswith('##'):
+                        yield '* [{}]({})\n'.format(stripped_header, chapter)
+                    elif header.startswith('#'):
+                        yield '\n\n## {}\n'.format(stripped_header)
+
     def write_summary(self, path_to_file=''):
+        """Writes the gitbook summary to a file
+        :parameter path_to_file Path to the file to be written. Default is the same directory where the method is called
+        :return None
+        """
+        path_to_file = path_to_file if path_to_file else self.gitbook_folder
+        with open(os.path.join(path_to_file, 'SUMMARY.md'), 'w', encoding='utf-8') as write_to_file:
+            # the summary file has to start with a # heading
+            write_to_file.write('# Summary\n\n')
+            for chapter_line in self._create_summary(self.list_of_files):
+                write_to_file.write(chapter_line)
+
+    def write_numbered_summary(self, path_to_file=''):
         """Writes the gitbook summary to a file
         :parameter path_to_file Path to the file to be written. Default is the same directory where the method is called
         :return None
@@ -131,7 +212,7 @@ def convert_metayaml_to_metajson(data, language='sl'):
             'isbn': json_data['identifier'],
             'author': json_data['creator'][0]['text'], # gitbook has no option for multiple authors so leave it this way for now
             'theme-default': {
-                'showLevel': True,
+                'showLevel': False,
             }
 
         }
