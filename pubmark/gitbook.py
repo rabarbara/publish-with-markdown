@@ -6,9 +6,9 @@ import shutil
 import os
 import yaml
 import json
+import re
 
-
-class Summary(object):
+class Gitbook(object):
     def __init__(self, gitbook_folder='gitbook', common_folder_name='poglavje', media_folder_name='media'):
         """
         :param gitbook_folder: the name of the folder the gitbook files should be copied to
@@ -56,6 +56,34 @@ class Summary(object):
 
         self.list_of_files = self._group_files(sorted([item for item in glob.glob(glob_description)], key=sections))
 
+    def remove_all_sidenotes(self):
+        for group in self.list_of_files():
+            for element in group:
+                contents = ''
+                with open(element, 'r', encoding='utf-8') as readf:
+                    contents = readf.read()
+                # we had multiple sidenote version so we have to chech against each version, the second version pattern is the new standard
+                first_version_pattern = re.compile(r'<[\*,\_,\?,](.*?)[\*,\_,\?,]>', re.MULTILINE)
+                second_version_pattern = re.compile(r'{{(.*?)}}', re.MULTILINE)
+                contents = re.sub(first_version_pattern, ' ', contents)
+                contents = re.sub(second_version_pattern, ' ', contents)
+                with open(element, 'w', encoding='utf-8' ) as write:
+                    write.write(contents)
+    
+    def insert_numbering(self):
+        for group in self.list_of_files():
+            for element in group:
+                contents = ''
+                with open(element, 'r', encoding='utf-8') as readf:
+                    contents = readf.read()
+                # we had multiple sidenote version so we have to chech against each version, the second version pattern is the new standard
+                first_version_pattern = re.compile(r'<[\*,\_,\?,](.*?)[\*,\_,\?,]>', re.MULTILINE)
+                second_version_pattern = re.compile(r'{{(.*?)}}', re.MULTILINE)
+                contents = re.sub(first_version_pattern, ' ', contents)
+                contents = re.sub(second_version_pattern, ' ', contents)
+                with open(element, 'w', encoding='utf-8' ) as write:
+                    write.write(contents)
+
     @staticmethod
     def _group_files(files):
         """Group a list of files based on the chapter they are in"""
@@ -66,6 +94,41 @@ class Summary(object):
             groups.append(list(g))  # Store group iterator as a list
             uniquekeys.append(k)
         return groups
+
+    def insert_numbering():
+        def create_numbered_headline(filename, line):
+            '''
+            Returns a numbered name of the file
+            :line str the line to be numbered
+            :return numbered string of the file
+            '''
+
+            if line.startswith('###'):
+                return '### {} {}\n'.format(filename, line.strip('### '))
+            elif line.startswith('##'):
+                return '## {} {}\n'.format(filename, line.strip('## '))
+            elif line.startswith('#'):
+                return '# {} {}\n'.format(filename, line.strip('# '))
+
+        for group in create_a_list_of_files():
+
+            for element in group:
+
+                # we need just the last part of the filepath to remove the padding and insert numbering into the file
+                filename = os.path.basename(element)
+                # we split the filename and convert it to int to remove the left pad and then put it back together
+                # we also remove the file extension because we don't need it
+                clean_filename = '.'.join([str(int(item)) for item in filename.strip('.md').split('.')])
+                first_line_contents = ''
+                contents = ''
+                with open(element, 'r', encoding='utf-8') as readf:
+                    # read the first line
+                    first_line_contents = readf.readline()
+                    # get the rest of the text
+                    contents = readf.read()
+                
+                with open(element, 'w', encoding='utf-8') as w:
+                    w.write('{}\n{}'.format(create_numbered_headline(clean_filename, first_line_contents), contents))    
 
     @staticmethod
     def _create_summary(list_of_chapters):
@@ -131,7 +194,7 @@ def convert_metayaml_to_metajson(data, language='sl'):
             'isbn': json_data['identifier'],
             'author': json_data['creator'][0]['text'], # gitbook has no option for multiple authors so leave it this way for now
             'theme-default': {
-                'showLevel': True,
+                'showLevel': False,
             }
 
         }
