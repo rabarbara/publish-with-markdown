@@ -8,6 +8,7 @@ import yaml
 import json
 import re
 
+
 class Gitbook(object):
     def __init__(self, gitbook_folder='gitbook', common_folder_name='poglavje', media_folder_name='media'):
         """
@@ -15,7 +16,8 @@ class Gitbook(object):
         :param common_folder_name: the common characters that exist in your folder names for all folders containing your book
         :param media_folder_name: where you keep your images and other files
         """
-        self.gitbook_folder = os.path.join(os.environ['HOME'], 'Desktop', gitbook_folder)
+        self.gitbook_folder = os.path.join(
+            os.environ['HOME'], 'Desktop', gitbook_folder)
         self.common_folder_name = common_folder_name
         self.media_folder_name = media_folder_name
         self.list_of_files = []
@@ -42,7 +44,8 @@ class Gitbook(object):
             shutil.copy('README.md', self.gitbook_folder)
         except FileNotFoundError:
             print('Datoteka README.md ne obstaja. Zato je bila ustvarjena.')
-            f = open(os.path.join(self.gitbook_folder, 'README.md'), 'w+', encoding='utf-8')
+            f = open(os.path.join(self.gitbook_folder,
+                     'README.md'), 'w+', encoding='utf-8')
             f.close()
 
     def create_a_list_of_files(self, glob_description):
@@ -54,7 +57,8 @@ class Gitbook(object):
             # omit the md extension that was giving false results
             return tuple(chapter_name.split('.')[:-1])
 
-        self.list_of_files = self._group_files(sorted([item for item in glob.glob(glob_description)], key=sections))
+        self.list_of_files = self._group_files(
+            sorted([item for item in glob.glob(glob_description)], key=sections))
 
     def remove_all_sidenotes(self):
         for group in self.list_of_files:
@@ -63,13 +67,13 @@ class Gitbook(object):
                 with open(element, 'r', encoding='utf-8') as readf:
                     contents = readf.read()
                 # we had multiple sidenote version so we have to chech against each version, the second version pattern is the new standard
-                first_version_pattern = re.compile(r'<[\*,\_,\?,](.*?)[\*,\_,\?,]>', re.MULTILINE)
+                first_version_pattern = re.compile(
+                    r'<[\*,\_,\?,](.*?)[\*,\_,\?,]>', re.MULTILINE)
                 second_version_pattern = re.compile(r'{{(.*?)}}', re.MULTILINE)
                 contents = re.sub(first_version_pattern, ' ', contents)
                 contents = re.sub(second_version_pattern, ' ', contents)
-                with open(element, 'w', encoding='utf-8' ) as write:
+                with open(element, 'w', encoding='utf-8') as write:
                     write.write(contents)
-
 
     @staticmethod
     def _group_files(files):
@@ -101,12 +105,14 @@ class Gitbook(object):
         '''
         Returns a clean filename based on the element with the extension md removed
         '''
-        print(element)
-        el = '.'.join([str(int(item)) for item in os.path.basename(element).strip('.md').split('.')])
-        print(el)
+        el = '.'.join([str(int(item)) for item in os.path.basename(
+            element).strip('.md').split('.')])
         return el
 
     def insert_numbering(self):
+        # this is a pattern that will be used to detect if the numbering is already present and will not number the line unneccessarily
+        numbering_pattern = re.compile(
+            r'\d{1,2}\.\d{1,2}\.\d{1,2}\s|\d{1,2}\.\d{1,2}\s|\d{1}\s', re.MULTILINE)
         for group in self.list_of_files:
             for element in group:
                 # we need just the last part of the filepath to remove the padding and insert numbering into the file
@@ -117,10 +123,13 @@ class Gitbook(object):
                 with open(element, 'r', encoding='utf-8') as readf:
                     # read the first line
                     first_line_contents = readf.readline()
-                    # get the rest of the text
-                    contents = readf.read()
-                with open(element, 'w', encoding='utf-8') as w:
-                    w.write('{}{}'.format(self._create_numbered_headline(self.clean_filename_element(element), first_line_contents), contents))
+                    # only proceed with the writing if the numbering is not present in the file => this way we avoid duplicating the numbering
+                    matches = re.search(numbering_pattern, first_line_contents)
+                    if  matches is None:
+                        # get the rest of the text
+                        contents = readf.read()
+                        with open(element, 'w', encoding='utf-8') as w:
+                            w.write('{}{}'.format(self._create_numbered_headline(self.clean_filename_element(element), first_line_contents), contents))
 
     def remove_numbering(self):
         ''' removes numbering from files
