@@ -15,7 +15,7 @@ class Gitbook(object):
         :param common_folder_name: the common characters that exist in your folder names for all folders containing your book
         :param media_folder_name: where you keep your images and other files
         """
-        self.gitbook_folder = os.path.join(os.environ['HOMEPATH'], 'Desktop', gitbook_folder)
+        self.gitbook_folder = os.path.join(os.environ['HOME'], 'Desktop', gitbook_folder)
         self.common_folder_name = common_folder_name
         self.media_folder_name = media_folder_name
         self.list_of_files = []
@@ -89,24 +89,25 @@ class Gitbook(object):
             :line str the line to be numbered
             :return numbered string of the file
             '''
-
             if line.startswith('###'):
-                return '### {} {}\n'.format(filename, line.strip('### '))
+                return '### {} {}'.format(filename, line.strip('# '))
             elif line.startswith('##'):
-                return '## {} {}\n'.format(filename, line.strip('## '))
+                return '## {} {}'.format(filename, line.strip('# '))
             elif line.startswith('#'):
-                return '# {} {}\n'.format(filename, line.strip('# '))
+                return '# {} {}'.format(filename, line.strip('# '))
+
     @staticmethod
     def clean_filename_element(element):
         '''
-        Returns a clean filename based on the element
+        Returns a clean filename based on the element with the extension md removed
         '''
-        
+        print(element)
         el = '.'.join([str(int(item)) for item in os.path.basename(element).strip('.md').split('.')])
+        print(el)
         return el
 
     def insert_numbering(self):
-        for group in self.list_of_files():
+        for group in self.list_of_files:
             for element in group:
                 # we need just the last part of the filepath to remove the padding and insert numbering into the file
                 # we split the filename and convert it to int to remove the left pad and then put it back together
@@ -119,7 +120,28 @@ class Gitbook(object):
                     # get the rest of the text
                     contents = readf.read()
                 with open(element, 'w', encoding='utf-8') as w:
-                    w.write('{}\n{}'.format(self._create_numbered_headline(self.clean_filename_element(element), first_line_contents), contents))
+                    w.write('{}{}'.format(self._create_numbered_headline(self.clean_filename_element(element), first_line_contents), contents))
+
+    def remove_numbering(self):
+        ''' removes numbering from files
+        This is useful when there insert numbering function was more too many times'''
+        # this removal pattern catches all repeated patterns up to the third level
+        removal_pattern = re.compile(r'\d{1,2}\.\d{1,2}\.\d{1,2}\s|\d{1,2}\.\d{1,2}\s|\d{1}\s', re.MULTILINE)
+        for group in self.list_of_files:
+            for element in group:
+                # we need just the last part of the filepath to remove the padding and insert numbering into the file
+                # we split the filename and convert it to int to remove the left pad and then put it back together
+                # we also remove the file extension because we don't need it
+                first_line_contents = ''
+                contents = ''
+                with open(element, 'r', encoding='utf-8') as readf:
+                    # read the first line and remove the numbering
+                    first_line_contents = readf.readline()
+                    header = re.sub(removal_pattern, '', first_line_contents)
+                    # get the rest of the text
+                    contents = readf.read()
+                with open(element, 'w', encoding='utf-8') as w:
+                    w.write('{}{}'.format(header, contents))
 
     @staticmethod
     def _create_summary(list_of_chapters):
@@ -136,19 +158,18 @@ class Gitbook(object):
                         yield '\n\n## {}\n'.format(stripped_header)
 
     @staticmethod
-    def _create_numbered_summary(list_of_chapters):
+    def _create_numbered_summary(list_of_chapters, clean_name, numbered_headline):
         for chapter_group in list_of_chapters:
             for chapter in chapter_group:
                 with open(chapter, 'r', encoding='utf-8') as file:
                     header = file.readline()
-                    # get the numbered header
-
+                    
                     if header.startswith('###'):
-                        yield '\t* [{}]({})\n'.format(stripped_header, chapter)
+                        yield '\t* [{}]({})\n'.format(header.strip('# ').strip(), chapter)
                     elif header.startswith('##'):
-                        yield '* [{}]({})\n'.format(stripped_header, chapter)
+                        yield '* [{}]({})\n'.format(header.strip('# ').strip(), chapter)
                     elif header.startswith('#'):
-                        yield '\n\n## {}\n'.format(stripped_header)
+                        yield '\n\n## {}\n'.format(header.strip('# ').strip())
 
     def write_summary(self, path_to_file=''):
         """Writes the gitbook summary to a file
@@ -171,7 +192,7 @@ class Gitbook(object):
         with open(os.path.join(path_to_file, 'SUMMARY.md'), 'w', encoding='utf-8') as write_to_file:
             # the summary file has to start with a # heading
             write_to_file.write('# Summary\n\n')
-            for chapter_line in self._create_summary(self.list_of_files):
+            for chapter_line in self._create_numbered_summary(self.list_of_files, self.clean_filename_element, self._create_numbered_headline):
                 write_to_file.write(chapter_line)
 
 
