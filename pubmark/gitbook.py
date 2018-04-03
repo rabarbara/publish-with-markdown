@@ -75,6 +75,27 @@ class Gitbook(object):
                 with open(element, 'w', encoding='utf-8') as write:
                     write.write(contents)
 
+    def adapt_media(self):
+        for group in self.list_of_files:
+            print(self.list_of_files)
+            for element in group:
+                contents = []
+                new_contents = []
+                with open(element, 'r', encoding='utf-8') as readf:
+                    contents = readf.readlines()
+                    for line in contents:
+                        
+                        if line.startswith('![](media'):
+                            # replace media with ../media
+                            replaced_line = line.replace('media', '../media')
+                            new_contents.append(replaced_line)
+                        else:
+
+                            new_contents.append(line)
+                with open(element, 'w', encoding='utf-8') as write:
+                    write.write(''.join(new_contents))
+                    
+
     @staticmethod
     def _group_files(files):
         """Group a list of files based on the chapter they are in"""
