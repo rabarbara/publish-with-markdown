@@ -68,8 +68,8 @@ class Gitbook(object):
                     contents = readf.read()
                 # we had multiple sidenote version so we have to chech against each version, the second version pattern is the new standard
                 first_version_pattern = re.compile(
-                    r'<[\*,\_,\?,](.*?)[\*,\_,\?,]>', re.MULTILINE)
-                second_version_pattern = re.compile(r'{{(.*?)}}', re.MULTILINE)
+                    r'<[\*,\_,\?,](.*?)[\*,\_,\?,]>', re.DOTALL)
+                second_version_pattern = re.compile(r'{{(.*?)}}', re.DOTALL)
                 contents = re.sub(first_version_pattern, ' ', contents)
                 contents = re.sub(second_version_pattern, ' ', contents)
                 with open(element, 'w', encoding='utf-8') as write:
