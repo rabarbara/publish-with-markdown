@@ -45,20 +45,20 @@ class Gitbook(object):
         except FileNotFoundError:
             print('Datoteka README.md ne obstaja. Zato je bila ustvarjena.')
             f = open(os.path.join(self.gitbook_folder,
-                     'README.md'), 'w+', encoding='utf-8')
+                    'README.md'), 'w+', encoding='utf-8')
             f.close()
 
     def create_a_list_of_files(self, glob_description):
-        """Return a sorted list of all files in a directory with relative paths"""
-
+        """Return a sorted list of all files in a directory with absolute paths"""
+        # it should list the gitbook folder paths, not the origin paths
+        # big mistake
         def sections(section):
             """Returns a tuple of all chapter info"""
             chapter_name = os.path.basename(section)
             # omit the md extension that was giving false results
             return tuple(chapter_name.split('.')[:-1])
-
         self.list_of_files = self._group_files(
-            sorted([item for item in glob.glob(glob_description)], key=sections))
+            sorted([os.path.join(self.gitbook_folder, item) for item in glob.glob(glob_description)], key=sections))
 
     def remove_all_sidenotes(self):
         for group in self.list_of_files:
