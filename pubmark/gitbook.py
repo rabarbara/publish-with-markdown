@@ -115,24 +115,36 @@ class Gitbook(object):
 
     def adapt_media(self):
         for group in self.list_of_files:
-            print(self.list_of_files)
             for element in group:
                 contents = []
                 new_contents = []
                 with open(element, 'r', encoding='utf-8') as readf:
                     contents = readf.readlines()
                     for line in contents:
-                        
+
                         if line.startswith('![](media'):
                             # replace media with ../media
                             replaced_line = line.replace('media', '../media')
                             new_contents.append(replaced_line)
                         else:
-
                             new_contents.append(line)
                 with open(element, 'w', encoding='utf-8') as write:
                     write.write(''.join(new_contents))
-                    
+
+
+    def remove_widths_and_heights(self):
+        for group in self.list_of_files:
+            for element in group:
+                contents = ''
+                with open(element, 'r', encoding='utf-8') as readf:
+                    contents = readf.read()
+                # remove width and height patterns that are useless for gitbook
+                pat = re.compile(r'{width=.*?height=.*?}', re.DOTALL)
+                contents = re.sub(pat, ' ', contents)
+
+                with open(element, 'w', encoding='utf-8') as write:
+                    write.write(contents)
+
 
     @staticmethod
     def _group_files(files):
