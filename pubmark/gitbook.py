@@ -243,11 +243,11 @@ class Gitbook(object):
             for chapter in chapter_group:
                 with open(chapter, 'r', encoding='utf-8') as file:
                     header = file.readline()
-                    
+                    splitted = os.path.split(chapter)
                     if header.startswith('###'):
-                        yield '\t* [{}]({})\n'.format(header.strip('# ').strip(), chapter)
+                        yield '\t* [{}]({})\n'.format(header.strip('# ').strip(), os.path.join(os.path.split(splitted[0])[1], splitted[1]))
                     elif header.startswith('##'):
-                        yield '* [{}]({})\n'.format(header.strip('# ').strip(), chapter)
+                        yield '* [{}]({})\n'.format(header.strip('# ').strip(), os.path.join(os.path.split(splitted[0])[1], splitted[1]))
                     elif header.startswith('#'):
                         yield '\n\n## {}\n'.format(header.strip('# ').strip())
 
@@ -260,6 +260,9 @@ class Gitbook(object):
         with open(os.path.join(path_to_file, 'SUMMARY.md'), 'w', encoding='utf-8') as write_to_file:
             # the summary file has to start with a # heading
             write_to_file.write('# Summary\n\n')
+            write_to_file.write('* [Uvod](README.md)\n')
+            write_to_file.write('* [Kolofon](kolofon.md)\n\n')
+
             for chapter_line in self._create_summary(self.list_of_files):
                 write_to_file.write(chapter_line)
 
@@ -272,6 +275,8 @@ class Gitbook(object):
         with open(os.path.join(path_to_file, 'SUMMARY.md'), 'w', encoding='utf-8') as write_to_file:
             # the summary file has to start with a # heading
             write_to_file.write('# Summary\n\n')
+            write_to_file.write('* [Uvod](README.md)\n')
+            write_to_file.write('* [Kolofon](kolofon.md)\n\n')
             for chapter_line in self._create_numbered_summary(self.list_of_files, self.clean_filename_element, self._create_numbered_headline):
                 write_to_file.write(chapter_line)
 
