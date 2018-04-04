@@ -48,6 +48,41 @@ class Gitbook(object):
             f = open(os.path.join(self.gitbook_folder,
                     'README.md'), 'w+', encoding='utf-8')
             f.close()
+        try:
+            shutil.copy('README.md', self.gitbook_folder)
+        except FileNotFoundError:
+            print('Datoteka README.md ne obstaja. Zato je bila ustvarjena.')
+            f = open(os.path.join(self.gitbook_folder,
+                    'README.md'), 'w+', encoding='utf-8')
+            f.close()
+        try:
+            shutil.copy('kolofon.md', self.gitbook_folder)
+        except FileNotFoundError:
+            print('Datoteka kolofon.md ne obstaja.')
+        try:
+            shutil.copy('book.json', self.gitbook_folder)
+        except FileNotFoundError:
+            try:
+                with open('meta.md', 'r', encoding='utf-8') as f:
+                    print('Datoteka book.json ne obstaja. Zato je bila ustvarjena iz meta.md. Preveri, če vse štima')
+                    book_json_path = os.path.join(self.gitbook_folder, 'book.json')
+                    with open(book_json_path, 'w', encoding='utf-8') as w:
+                        w.write(convert_metayaml_to_metajson(f.read()))
+            except FileNotFoundError:
+                print('Datoteka book.json ne obstaja. Zato je bila ustvarjena. Popravi, kar ni v redu.')
+                book_json = {
+            'gitbook': '>=3.x.x', # support for gitbook 3 or later
+            'plugins': ["-lunr", "-search", "search-plus-mod"], # disable default search
+            'title': '',
+            'language': 'sl-SI',
+            'isbn': '',
+            'author': '', # gitbook has no option for multiple authors so leave it this way for now
+            'theme-default': {
+                'showLevel': False,
+            }
+        }
+                with open(book_json_path, 'w', encoding='utf-8') as w:
+                        w.write(json.dumps(book_json, indent=4))
 
     def create_a_list_of_files(self, glob_description):
         """Return a sorted list of all files in a directory with absolute paths"""
