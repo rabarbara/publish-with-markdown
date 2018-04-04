@@ -21,6 +21,7 @@ class Gitbook(object):
         self.common_folder_name = common_folder_name
         self.media_folder_name = media_folder_name
         self.list_of_files = []
+        self.list_of_files_relative = []
         print('collected items', self.gitbook_folder)
 
     def copy_files_for_gitbook(self):
@@ -59,6 +60,8 @@ class Gitbook(object):
             return tuple(chapter_name.split('.')[:-1])
         self.list_of_files = self._group_files(
             sorted([os.path.join(self.gitbook_folder, item) for item in glob.glob(glob_description)], key=sections))
+        self.list_of_files_relative = self._group_files(
+            sorted([item for item in glob.glob(glob_description)], key=sections))
 
     def remove_all_sidenotes(self):
         for group in self.list_of_files:
