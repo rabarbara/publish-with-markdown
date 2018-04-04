@@ -21,6 +21,7 @@ class Gitbook(object):
         self.common_folder_name = common_folder_name
         self.media_folder_name = media_folder_name
         self.list_of_files = []
+        self.list_of_files_relative = []
         print('collected items', self.gitbook_folder)
 
     def copy_files_for_gitbook(self):
@@ -45,19 +46,56 @@ class Gitbook(object):
         except FileNotFoundError:
             print('Datoteka README.md ne obstaja. Zato je bila ustvarjena.')
             f = open(os.path.join(self.gitbook_folder,
-                     'README.md'), 'w+', encoding='utf-8')
+                    'README.md'), 'w+', encoding='utf-8')
             f.close()
+        try:
+            shutil.copy('README.md', self.gitbook_folder)
+        except FileNotFoundError:
+            print('Datoteka README.md ne obstaja. Zato je bila ustvarjena.')
+            f = open(os.path.join(self.gitbook_folder,
+                    'README.md'), 'w+', encoding='utf-8')
+            f.close()
+        try:
+            shutil.copy('kolofon.md', self.gitbook_folder)
+        except FileNotFoundError:
+            print('Datoteka kolofon.md ne obstaja.')
+        try:
+            shutil.copy('book.json', self.gitbook_folder)
+        except FileNotFoundError:
+            try:
+                with open('meta.md', 'r', encoding='utf-8') as f:
+                    print('Datoteka book.json ne obstaja. Zato je bila ustvarjena iz meta.md. Preveri, če vse štima')
+                    book_json_path = os.path.join(self.gitbook_folder, 'book.json')
+                    with open(book_json_path, 'w', encoding='utf-8') as w:
+                        w.write(convert_metayaml_to_metajson(f.read()))
+            except FileNotFoundError:
+                print('Datoteka book.json ne obstaja. Zato je bila ustvarjena. Popravi, kar ni v redu.')
+                book_json = {
+            'gitbook': '>=3.x.x', # support for gitbook 3 or later
+            'plugins': ["-lunr", "-search", "search-plus-mod"], # disable default search
+            'title': '',
+            'language': 'sl-SI',
+            'isbn': '',
+            'author': '', # gitbook has no option for multiple authors so leave it this way for now
+            'theme-default': {
+                'showLevel': False,
+            }
+        }
+                with open(book_json_path, 'w', encoding='utf-8') as w:
+                        w.write(json.dumps(book_json, indent=4))
 
     def create_a_list_of_files(self, glob_description):
-        """Return a sorted list of all files in a directory with relative paths"""
-
+        """Return a sorted list of all files in a directory with absolute paths"""
+        # it should list the gitbook folder paths, not the origin paths
+        # big mistake
         def sections(section):
             """Returns a tuple of all chapter info"""
             chapter_name = os.path.basename(section)
             # omit the md extension that was giving false results
             return tuple(chapter_name.split('.')[:-1])
-
         self.list_of_files = self._group_files(
+            sorted([os.path.join(self.gitbook_folder, item) for item in glob.glob(glob_description)], key=sections))
+        self.list_of_files_relative = self._group_files(
             sorted([item for item in glob.glob(glob_description)], key=sections))
 
     def remove_all_sidenotes(self):
@@ -74,6 +112,39 @@ class Gitbook(object):
                 contents = re.sub(second_version_pattern, ' ', contents)
                 with open(element, 'w', encoding='utf-8') as write:
                     write.write(contents)
+
+    def adapt_media(self):
+        for group in self.list_of_files:
+            for element in group:
+                contents = []
+                new_contents = []
+                with open(element, 'r', encoding='utf-8') as readf:
+                    contents = readf.readlines()
+                    for line in contents:
+
+                        if line.startswith('![](media'):
+                            # replace media with ../media
+                            replaced_line = line.replace('media', '../media')
+                            new_contents.append(replaced_line)
+                        else:
+                            new_contents.append(line)
+                with open(element, 'w', encoding='utf-8') as write:
+                    write.write(''.join(new_contents))
+
+
+    def remove_widths_and_heights(self):
+        for group in self.list_of_files:
+            for element in group:
+                contents = ''
+                with open(element, 'r', encoding='utf-8') as readf:
+                    contents = readf.read()
+                # remove width and height patterns that are useless for gitbook
+                pat = re.compile(r'{width=.*?height=.*?}', re.DOTALL)
+                contents = re.sub(pat, ' ', contents)
+
+                with open(element, 'w', encoding='utf-8') as write:
+                    write.write(contents)
+
 
     @staticmethod
     def _group_files(files):
@@ -172,11 +243,11 @@ class Gitbook(object):
             for chapter in chapter_group:
                 with open(chapter, 'r', encoding='utf-8') as file:
                     header = file.readline()
-                    
+                    splitted = os.path.split(chapter)
                     if header.startswith('###'):
-                        yield '\t* [{}]({})\n'.format(header.strip('# ').strip(), chapter)
+                        yield '\t* [{}]({})\n'.format(header.strip('# ').strip(), os.path.join(os.path.split(splitted[0])[1], splitted[1]))
                     elif header.startswith('##'):
-                        yield '* [{}]({})\n'.format(header.strip('# ').strip(), chapter)
+                        yield '* [{}]({})\n'.format(header.strip('# ').strip(), os.path.join(os.path.split(splitted[0])[1], splitted[1]))
                     elif header.startswith('#'):
                         yield '\n\n## {}\n'.format(header.strip('# ').strip())
 
@@ -189,6 +260,9 @@ class Gitbook(object):
         with open(os.path.join(path_to_file, 'SUMMARY.md'), 'w', encoding='utf-8') as write_to_file:
             # the summary file has to start with a # heading
             write_to_file.write('# Summary\n\n')
+            write_to_file.write('* [Uvod](README.md)\n')
+            write_to_file.write('* [Kolofon](kolofon.md)\n\n')
+
             for chapter_line in self._create_summary(self.list_of_files):
                 write_to_file.write(chapter_line)
 
@@ -201,6 +275,8 @@ class Gitbook(object):
         with open(os.path.join(path_to_file, 'SUMMARY.md'), 'w', encoding='utf-8') as write_to_file:
             # the summary file has to start with a # heading
             write_to_file.write('# Summary\n\n')
+            write_to_file.write('* [Uvod](README.md)\n')
+            write_to_file.write('* [Kolofon](kolofon.md)\n\n')
             for chapter_line in self._create_numbered_summary(self.list_of_files, self.clean_filename_element, self._create_numbered_headline):
                 write_to_file.write(chapter_line)
 
