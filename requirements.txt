@@ -1,2 +1,4 @@
 pytest
 pyaml
+pypandoc
+panflute

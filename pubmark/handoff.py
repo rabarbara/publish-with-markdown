@@ -1,6 +1,7 @@
 """Creates a file ready for handoff to the typesetter"""
 
 import os
+import pkg_resources
 from itertools import zip_longest
 from collections import OrderedDict
 from itertools import islice
@@ -157,12 +158,15 @@ class FileCreator(object):
             and additional empty paragraphs
         """
         # outputs a docx file with replaced items
-        absolute_filter_path = os.path.abspath('typesetter_filter.py')
+        resource_package = __name__
+        resource_path = '/'.join(('filters', 'typesetter_filter.py'))
+        typesetter_filter = pkg_resources.resource_stream(resource_package, resource_path)
+        print(typesetter_filter.name)
         if filename is None:
             filename = self.docx_name
         combined_file = ''.join(self.file)
         pypandoc.convert_text(combined_file, to="docx", format="md",
-                              filters=[absolute_filter_path],
+                              filters=[typesetter_filter.name],
                               extra_args=['--atx-headers'],
                               outputfile="{}.docx".format(self.docx_name))
 
