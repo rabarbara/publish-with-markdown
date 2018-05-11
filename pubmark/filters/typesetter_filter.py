@@ -9,7 +9,11 @@ def action(elem, doc):
         return elem
     if isinstance(elem, Para) and isinstance(elem.next, Header):
         return elem
+    if isinstance(elem, Para) and isinstance(elem.next, Note):
+        pass
     if isinstance(elem, Para) and elem.next == None:
+        pass
+    if isinstance(elem, Para) and elem.prev == None:
         pass
     if isinstance(elem, Para):
         e = Para(Str(''))

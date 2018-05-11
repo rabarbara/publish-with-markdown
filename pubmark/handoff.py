@@ -55,24 +55,24 @@ class FileCreator(object):
         # it is a code smell but it is only used here
         
         for line in self.file:
-            if line.startswith('###### '):
-                # start by increasing the count of your own header by one
-                # this way the count is valid for all later headings that are "contained" by this heading, otherwise, the count is up by 1, which is wrong
-                header_map['h6'] += 1
-                # strip the header signature and re-add it later
-                header_level = 6
-                numbered_line = self.header_string(line, header_map, header_level, style=self.style)
-                file_container.append(numbered_line)
+            # if line.startswith('###### '):
+            #     # start by increasing the count of your own header by one
+            #     # this way the count is valid for all later headings that are "contained" by this heading, otherwise, the count is up by 1, which is wrong
+            #     header_map['h6'] += 1
+            #     # strip the header signature and re-add it later
+            #     header_level = 6
+            #     numbered_line = self.header_string(line, header_map, header_level, style=self.style)
+            #     file_container.append(numbered_line)
                 
-            elif line.startswith('##### '):
-                header_map['h5'] += 1
-                # strip the header signature and re-add it later
-                header_level = 5
-                numbered_line = self.header_string(line, header_map, header_level, style=self.style)
-                file_container.append(numbered_line)
+            # elif line.startswith('##### '):
+            #     header_map['h5'] += 1
+            #     # strip the header signature and re-add it later
+            #     header_level = 5
+            #     numbered_line = self.header_string(line, header_map, header_level, style=self.style)
+            #     file_container.append(numbered_line)
                 
                 
-            elif line.startswith('#### '):
+            if line.startswith('#### '):
                 header_map['h4'] += 1
                 # strip the header signature and re-add it later
                 print(header_map)
