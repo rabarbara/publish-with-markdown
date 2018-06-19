@@ -250,6 +250,10 @@ class Gitbook(object):
                         yield '* [{}]({})\n'.format(header.strip('# ').strip(), os.path.join(os.path.split(splitted[0])[1], splitted[1]))
                     elif header.startswith('#'):
                         yield '\n\n## {}\n'.format(header.strip('# ').strip())
+                        if len(file.readlines()) > 3:
+                            yield '* [{}]({})\n'.format(header.strip('# ').strip(), os.path.join(os.path.split(splitted[0])[1], splitted[1]))
+
+
 
     def write_summary(self, path_to_file=''):
         """Writes the gitbook summary to a file
