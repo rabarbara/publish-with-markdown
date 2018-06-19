@@ -12,7 +12,7 @@ import pypandoc
 class FileCreator(object):
     """Opens the specified file and converts it to docx"""
 
-    def __init__(self, filename, style=".", start=None):
+    def __init__(self, filename, style=".", table=False, start=None):
         self.filename = os.path.basename(filename)
         if start == None:
             self.start = self.filename
@@ -23,6 +23,8 @@ class FileCreator(object):
         self.style = style
         self.file = self.open_file()
         self.docx_name = self.filename.strip('.md')
+        self.table = table
+        print(self.table)
 
     def __repr__(self):
         return '{}'.format(self.filename)
@@ -165,7 +167,15 @@ class FileCreator(object):
         if filename is None:
             filename = self.docx_name
         combined_file = ''.join(self.file)
-        pypandoc.convert_text(combined_file, to="docx", format="md",
+        if self.table:
+            print(self.table)
+            output = pypandoc.convert_text(combined_file, to="html", format="html")
+            pypandoc.convert_text(output, to="docx", format="html",
+                              filters=[typesetter_filter.name],
+                              extra_args=['--atx-headers'],
+                              outputfile="{}.docx".format(self.docx_name))
+        else:
+            pypandoc.convert_text(combined_file, to="docx", format="md",
                               filters=[typesetter_filter.name],
                               extra_args=['--atx-headers'],
                               outputfile="{}.docx".format(self.docx_name))
