@@ -24,7 +24,6 @@ class FileCreator(object):
         self.file = self.open_file()
         self.docx_name = self.filename.strip('.md')
         self.table = table
-        print(self.table)
 
     def __repr__(self):
         return '{}'.format(self.filename)
@@ -168,8 +167,8 @@ class FileCreator(object):
             filename = self.docx_name
         combined_file = ''.join(self.file)
         if self.table:
-            print(self.table)
-            output = pypandoc.convert_text(combined_file, to="html", format="html")
+            
+            output = pypandoc.convert_text(combined_file, to="html", format="markdown")
             pypandoc.convert_text(output, to="docx", format="html",
                               filters=[typesetter_filter.name],
                               extra_args=['--atx-headers'],

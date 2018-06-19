@@ -11,7 +11,7 @@ def action(elem, doc):
         return elem
     if isinstance(elem, Para) and isinstance(elem.parent, Note):
         return elem
-    if isinstance(elem, Para):
+    if isinstance(elem, Para) and not isinstance(elem.parent, TableCell):
         e = Para(Str(''))
         return [elem, e]
     if isinstance(elem, Header) and elem.prev is not None:
