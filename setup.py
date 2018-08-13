@@ -20,5 +20,10 @@ setup(
     author_email='matej@stavanja.io',
     url='https://github.com/rabarbara/publish-with-markdown.git',
     license=license,
+    install_requires=['pytest',
+    'pyaml',
+    'pypandoc',
+    'panflute',
+    ],
     packages=find_packages(exclude=('tests', 'docs'))
 )
