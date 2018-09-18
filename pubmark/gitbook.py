@@ -265,25 +265,25 @@ class Gitbook(object):
                 subtitle = data['subtitle']
 
                 readme_contents="""
-                    {{% center %}} 
-                    {}
-                    {{% endcenter %}}
+{{% center %}} 
+{}
+{{% endcenter %}}
 
 
 
 
-                    <br><br>
-                    {{% center %}}
+<br><br>
+{{% center %}}
 
-                    # {}
+# {}
 
-                    ## {}
+## {}
 
-                    {{% endcenter %}}
+{{% endcenter %}}
 
-                    <br><br><br><br><br><br><br>
+<br><br><br><br><br><br><br>
 
-                    {{% center %}} {} {{% endcenter %}}
+{{% center %}} {} {{% endcenter %}}
                 """.format(authors_list, title, subtitle, curr_date)
                 with open(readme_path, 'w', encoding='utf-8') as w:
                     w.write(readme_contents)
