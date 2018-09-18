@@ -7,7 +7,7 @@ import os
 import yaml
 import json
 import re
-
+import datetime
 
 class Gitbook(object):
     def __init__(self, gitbook_folder='gitbook', common_folder_name='poglavje', media_folder_name='media'):
@@ -42,19 +42,15 @@ class Gitbook(object):
         shutil.copytree(self.media_folder_name,
                         '{}/{}'.format(self.gitbook_folder, self.media_folder_name))
         try:
-            shutil.copy('README.md', self.gitbook_folder)
+            # shutil.copy('README.md', self.gitbook_folder)
+            shutil.copy('README.md', os.path.join(self.gitbook_folder, "UVOD.md"))
         except FileNotFoundError:
-            print('Datoteka README.md ne obstaja. Zato je bila ustvarjena.')
+            print('Datoteka README.md ne obstaja. Zato je bila ustvarjena in narejena kot UVOD.md')
             f = open(os.path.join(self.gitbook_folder,
-                    'README.md'), 'w+', encoding='utf-8')
+                    'UVOD.md'), 'w+', encoding='utf-8')
             f.close()
-        try:
-            shutil.copy('README.md', self.gitbook_folder)
-        except FileNotFoundError:
-            print('Datoteka README.md ne obstaja. Zato je bila ustvarjena.')
-            f = open(os.path.join(self.gitbook_folder,
-                    'README.md'), 'w+', encoding='utf-8')
-            f.close()
+            
+        
         try:
             shutil.copy('kolofon.md', self.gitbook_folder)
         except FileNotFoundError:
@@ -253,6 +249,48 @@ class Gitbook(object):
                         if len(file.readlines()) > 3:
                             yield '* [{}]({})\n'.format(header.strip('# ').strip(), os.path.join(os.path.split(splitted[0])[1], splitted[1]))
 
+    @staticmethod
+    def _create_readme_from_metadata(data):
+        try:
+            with open('meta.md', 'r', encoding='utf-8') as f:
+                data = json.loads(convert_metayaml_to_metajson(f.read()))
+                
+                readme_path = os.path.join(self.gitbook_folder, 'README.md')
+
+                authors_list = "<br>\n".join(data['author'])
+                curr_date = datetime.date.today().strftime('%B %Y')
+                title = data['title'][0]['text']
+                subtitle = data['subtitle']
+
+                readme_contents="""
+                    {% center %} 
+                    {}
+                    {% endcenter %}
+
+
+
+
+                    <br><br>
+                    {% center %}
+
+                    # {}
+
+                    ## {}
+                    
+                    {% endcenter %}
+
+                    <br><br><br><br><br><br><br>
+
+                    {% center %} {} {% endcenter %}
+                """.format(authors_list, title, subtitle, curr_date)
+                with open(readme_path, 'w', encoding='utf-8') as w:
+                    w.write(readme_contents)
+        except FileNotFoundError:
+            print("Ni datoteke meta.md")
+        except KeyError as e:
+            print("Manjka key v meta.md. Več info tukaj: {}".format(e))
+
+
 
 
     def write_summary(self, path_to_file=''):
@@ -285,7 +323,7 @@ class Gitbook(object):
                 write_to_file.write(chapter_line)
 
 
-def convert_metayaml_to_metajson(data, language='sl'):
+def convert_metayaml_to_metajson(data, language='sl', keepAllAuthors=False):
     """
     Converts the yaml metadata as defined in pandoc for gitbook consumption as a book.json
     @param data: the data to be converted
@@ -314,13 +352,19 @@ def convert_metayaml_to_metajson(data, language='sl'):
         raise ValueError('Missing data from metadata: {}'.format('- \n'.join(missing_entries)))
     else:
         # create the dictionary that will enventually become book.json for gitbook
+        # if authors should be kept in a list or just as the first author
+
+        if keepAllAuthors:
+            authors = json_data['creator']
+        else:
+            authors = json_data['creator'][0]['text'], # gitbook has no option for multiple authors so leave it this way for now
         book_json = {
             'gitbook': '>=3.x.x', # support for gitbook 3 or later
             'plugins': ["-lunr", "-search", "search-plus-mod"], # disable default search
             'title': json_data['title'][0]['text'],
             'language': language,
             'isbn': json_data['identifier'],
-            'author': json_data['creator'][0]['text'], # gitbook has no option for multiple authors so leave it this way for now
+            'author': author
             'theme-default': {
                 'showLevel': False,
             }
