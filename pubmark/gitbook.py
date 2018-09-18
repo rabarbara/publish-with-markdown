@@ -22,7 +22,7 @@ class Gitbook(object):
         self.media_folder_name = media_folder_name
         self.list_of_files = []
         self.list_of_files_relative = []
-        print('collected items', self.gitbook_folder)
+        
 
     def copy_files_for_gitbook(self):
         """Recreate a folder and copy files to that folder"""
@@ -50,6 +50,9 @@ class Gitbook(object):
                     'UVOD.md'), 'w+', encoding='utf-8')
             f.close()
             
+        
+        self.create_readme_from_metadata()
+        
         
         try:
             shutil.copy('kolofon.md', self.gitbook_folder)
@@ -249,46 +252,51 @@ class Gitbook(object):
                         if len(file.readlines()) > 3:
                             yield '* [{}]({})\n'.format(header.strip('# ').strip(), os.path.join(os.path.split(splitted[0])[1], splitted[1]))
 
-    @staticmethod
-    def _create_readme_from_metadata(data):
+    
+    def create_readme_from_metadata(self):
         try:
             with open('meta.md', 'r', encoding='utf-8') as f:
                 data = json.loads(convert_metayaml_to_metajson(f.read()))
-                
+                print(data)
                 readme_path = os.path.join(self.gitbook_folder, 'README.md')
 
-                authors_list = "<br>\n".join(data['author'])
+                authors_list = "<br>\n".join(data['authors'])
                 curr_date = datetime.date.today().strftime('%B %Y')
-                title = data['title'][0]['text']
+                title = data['title']
                 subtitle = data['subtitle']
 
                 readme_contents="""
-                    {% center %} 
+                    {{% center %}} 
                     {}
-                    {% endcenter %}
+                    {{% endcenter %}}
 
 
 
 
                     <br><br>
-                    {% center %}
+                    {{% center %}}
 
                     # {}
 
                     ## {}
 
-                    {% endcenter %}
+                    {{% endcenter %}}
 
                     <br><br><br><br><br><br><br>
 
-                    {% center %} {} {% endcenter %}
+                    {{% center %}} {} {{% endcenter %}}
                 """.format(authors_list, title, subtitle, curr_date)
                 with open(readme_path, 'w', encoding='utf-8') as w:
                     w.write(readme_contents)
         except FileNotFoundError:
             print("Ni datoteke meta.md")
         except KeyError as e:
-            print("Manjka key v meta.md. Več info tukaj: {}".format(e))
+            print("""
+            
+            Manjka key v meta.md. Več info tukaj: {}
+            
+            
+            """.format(e))
 
 
 
@@ -324,7 +332,7 @@ class Gitbook(object):
                 write_to_file.write(chapter_line)
 
 
-def convert_metayaml_to_metajson(data, language='sl', keepAllAuthors=False):
+def convert_metayaml_to_metajson(data, language='sl'):
     """
     Converts the yaml metadata as defined in pandoc for gitbook consumption as a book.json
     @param data: the data to be converted
@@ -355,21 +363,22 @@ def convert_metayaml_to_metajson(data, language='sl', keepAllAuthors=False):
         # create the dictionary that will enventually become book.json for gitbook
         # if authors should be kept in a list or just as the first author
 
-        if keepAllAuthors:
-            authors = json_data['creator']
-        else:
-            authors = json_data['creator'][0]['text'], # gitbook has no option for multiple authors so leave it this way for now
+        
+        authors = json_data['author']
+        
         book_json = {
             'gitbook': '>=3.x.x', # support for gitbook 3 or later
             'plugins': ["-lunr", "-search", "search-plus-mod"], # disable default search
             'title': json_data['title'][0]['text'],
+            'subtitle': json_data['subtitle'],
             'language': language,
             'isbn': json_data['identifier'],
-            'author': author
+            'authors': authors,
+            'author': json_data['creator'][0]['text'],
             'theme-default': {
                 'showLevel': False,
             }
 
         }
-
+    
     return json.dumps(book_json, indent=4)
