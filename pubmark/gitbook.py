@@ -71,7 +71,7 @@ class Gitbook(object):
                 print('Datoteka book.json ne obstaja. Zato je bila ustvarjena. Popravi, kar ni v redu.')
                 book_json = {
             'gitbook': '>=3.x.x', # support for gitbook 3 or later
-            'plugins': ["-lunr", "-search", "search-plus-mod"], # disable default search
+            'plugins': ["-lunr", "-search", "search-plus-mod", "block-alignblock-align"], # disable default search
             'title': '',
             'language': 'sl-SI',
             'isbn': '',
@@ -257,7 +257,6 @@ class Gitbook(object):
         try:
             with open('meta.md', 'r', encoding='utf-8') as f:
                 data = json.loads(convert_metayaml_to_metajson(f.read()))
-                print(data)
                 readme_path = os.path.join(self.gitbook_folder, 'README.md')
 
                 authors_list = "<br>\n".join(data['authors'])
@@ -368,7 +367,7 @@ def convert_metayaml_to_metajson(data, language='sl'):
         
         book_json = {
             'gitbook': '>=3.x.x', # support for gitbook 3 or later
-            'plugins': ["-lunr", "-search", "search-plus-mod"], # disable default search
+            'plugins': ["-lunr", "-search", "search-plus-mod", "block-align"], # disable default search
             'title': json_data['title'][0]['text'],
             'subtitle': json_data['subtitle'],
             'language': language,
