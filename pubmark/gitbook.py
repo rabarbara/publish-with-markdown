@@ -276,7 +276,7 @@ class Gitbook(object):
                     # {}
 
                     ## {}
-                    
+
                     {% endcenter %}
 
                     <br><br><br><br><br><br><br>
@@ -302,7 +302,8 @@ class Gitbook(object):
         with open(os.path.join(path_to_file, 'SUMMARY.md'), 'w', encoding='utf-8') as write_to_file:
             # the summary file has to start with a # heading
             write_to_file.write('# Summary\n\n')
-            write_to_file.write('* [Uvod](README.md)\n')
+            write_to_file.write('* [Naslovnica](README.md)\n')
+            write_to_file.write('* [Uvod](UVOD.md)\n')
             write_to_file.write('* [Kolofon](kolofon.md)\n\n')
 
             for chapter_line in self._create_summary(self.list_of_files):
